@@ -1,0 +1,20 @@
+{
+  "name": "Live2D Character Space",
+  "short_name": "Live2D Space",
+  "description": "单角色 Live2D 陪伴空间",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#c9d8ef",
+  "theme_color": "#7c78c8",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
