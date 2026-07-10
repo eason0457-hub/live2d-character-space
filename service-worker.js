@@ -1,7 +1,7 @@
-const CACHE_NAME = 'live2d-space-v5';
+const CACHE_NAME = 'live2d-space-v6';
 const APP_SHELL = [
   './', './index.html', './manifest.webmanifest', './styles.bundle.css', './app.bundle.js',
-  './background-fix.js', './data/dialogues.json', './assets/icon.svg', './libs/extra.js'
+  './background-fix.js', './mygo-music.js', './data/dialogues.json', './assets/icon.svg', './libs/extra.js'
 ];
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
