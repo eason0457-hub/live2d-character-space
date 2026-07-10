@@ -1,0 +1,29 @@
+name: Unpack project
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruct and import project
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .upload/part00 .upload/part01 .upload/part02 | base64 --decode > /tmp/live2d-project.zip
+          unzip -o /tmp/live2d-project.zip -d .
+          rm -rf .upload
+          rm -f .init
+          rm -f .github/workflows/unpack-project.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Import Live2D Character Space"
+          git push
