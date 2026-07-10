@@ -1,4 +1,4 @@
-const CACHE_NAME = 'live2d-space-v3';
+const CACHE_NAME = 'live2d-space-v4';
 const APP_SHELL = [
   './', './index.html', './manifest.webmanifest', './styles.bundle.css', './app.bundle.js',
   './data/dialogues.json', './assets/icon.svg', './libs/extra.js'
