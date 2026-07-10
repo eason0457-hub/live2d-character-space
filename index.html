@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="description" content="适合手机与桌面的单角色 Live2D 陪伴空间。">
+  <meta name="theme-color" content="#7c78c8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Live2D Space">
+  <title>Live2D 角色空间</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
+  <link rel="apple-touch-icon" href="./assets/icon.svg">
+  <link rel="stylesheet" href="./styles.bundle.css">
+</head>
+<body class="companion-mode" data-background="sky">
+  <div class="app-wrap">
+    <main class="main-content">
+      <section class="canvas-area" aria-label="Live2D 角色空间">
+        <div class="ambient-layer" aria-hidden="true"><span></span><span></span><span></span></div>
+        <canvas id="live2d-canvas" aria-label="Live2D 角色；拖动移动，双指缩放，轻点互动"></canvas>
+
+        <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite" hidden>
+          <div class="spinner" aria-hidden="true"></div>
+          <p class="loading-text">正在载入角色…</p>
+        </div>
+        <div id="empty-message" class="canvas-message">
+          <strong>欢迎来到角色空间</strong>
+          <p>正在准备示例角色，也可以从设置中导入自己的合法模型。</p>
+        </div>
+        <div id="model-label" class="model-label" hidden></div>
+
+        <div id="dialogue-bubble" class="dialogue-bubble" role="status" aria-live="polite" hidden>
+          <span id="dialogue-text"></span>
+        </div>
+        <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+        <div class="top-bar">
+          <div class="brand" aria-label="Live2D 角色空间">
+            <span class="brand-dot"></span>
+            <span>CHARACTER SPACE</span>
+          </div>
+          <button id="menu-btn" class="round-btn" type="button" aria-label="展开控制菜单" aria-expanded="false">☰</button>
+        </div>
+
+        <nav id="quick-controls" class="quick-controls" aria-label="角色控制">
+          <button id="motion-btn" type="button"><span>✦</span>动作</button>
+          <button id="expression-btn" type="button"><span>◌</span>表情</button>
+          <button id="talk-btn" type="button"><span>…</span>对话</button>
+          <button id="mute-btn" type="button" aria-pressed="false"><span>♫</span>声音</button>
+          <button id="background-btn" type="button"><span>▧</span>背景</button>
+          <button id="fullscreen-btn" type="button"><span>⛶</span>全屏</button>
+          <button id="settings-btn" type="button"><span>⚙</span>设置</button>
+        </nav>
+
+        <aside id="action-sheet" class="action-sheet" aria-label="动作与表情" hidden>
+          <div class="sheet-head"><h2 id="action-sheet-title">动作</h2><button class="sheet-close" type="button" aria-label="关闭">×</button></div>
+          <section id="motion-section" class="panel-section">
+            <div id="motions-panel" class="feature-list"><p class="empty-msg">当前模型没有动作</p></div>
+          </section>
+          <section id="expression-section" class="panel-section" hidden>
+            <div id="expressions-panel" class="feature-list"><p class="empty-msg">当前模型没有表情</p></div>
+          </section>
+        </aside>
+
+        <aside id="settings-panel" class="settings-panel" aria-labelledby="settings-heading" hidden>
+          <div class="sheet-head"><div><p class="eyebrow">COMPANION SETTINGS</p><h2 id="settings-heading">角色空间设置</h2></div><button class="sheet-close" type="button" aria-label="关闭">×</button></div>
+
+          <section class="settings-group">
+            <h3>角色模型</h3>
+            <div class="loader-group model-loader">
+              <input type="text" id="model-url-input" inputmode="url" placeholder="输入 .model.json / .model3.json / .zip 地址">
+              <button id="load-url-btn" type="button">载入网址</button>
+            </div>
+            <div class="loader-group">
+              <div class="model-dropdown" id="model-dropdown" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+                <span class="dropdown-label" id="dropdown-label">示例模型</span>
+                <ul class="dropdown-list" id="dropdown-list" role="listbox">
+                  <li class="dropdown-option" role="option" data-value="https://raw.githubusercontent.com/guansss/pixi-live2d-display/master/test/assets/shizuku/shizuku.model.json">Shizuku（Cubism 2）</li>
+                  <li class="dropdown-option" role="option" data-value="https://raw.githubusercontent.com/guansss/pixi-live2d-display/master/test/assets/haru/haru_greeter_t03.model3.json">Haru（Cubism 4）</li>
+                  <li class="dropdown-option" id="upload-btn" role="button">导入 ZIP 模型</li>
+                </ul>
+                <input type="file" id="zip-upload-input" accept=".zip" hidden>
+                <input type="hidden" id="dropdown-value" value="">
+              </div>
+              <button id="load-selected-btn" type="button">载入示例</button>
+            </div>
+            <p class="hint">也可将固定模型放到 <code>assets/models/character/</code> 并在配置文件中指定。</p>
+          </section>
+
+          <section class="settings-group">
+            <h3>背景</h3>
+            <div class="file-row">
+              <button id="cycle-background-btn" type="button">切换预设</button>
+              <label class="file-btn">选择图片<input id="background-file" type="file" accept="image/*" hidden></label>
+            </div>
+          </section>
+
+          <section class="settings-group">
+            <h3>声音</h3>
+            <label>背景音乐 <input id="bgm-volume" type="range" min="0" max="1" step="0.05" value="0.35"></label>
+            <label>角色语音 <input id="voice-volume" type="range" min="0" max="1" step="0.05" value="0.8"></label>
+            <div class="file-row">
+              <label class="file-btn">选择 BGM<input id="bgm-file" type="file" accept="audio/*" hidden></label>
+              <label class="file-btn">选择语音<input id="voice-file" type="file" accept="audio/*" hidden></label>
+            </div>
+          </section>
+
+          <section class="settings-group">
+            <h3>互动</h3>
+            <label class="switch-row"><span>显示字幕</span><input id="subtitles-toggle" type="checkbox" checked></label>
+            <label class="switch-row"><span>自动待机反应</span><input id="auto-action-toggle" type="checkbox" checked></label>
+            <label>自定义待机台词<textarea id="custom-dialogues" rows="3" placeholder="每行一句"></textarea></label>
+          </section>
+
+          <section class="settings-group advanced-controls">
+            <h3>高级</h3>
+            <label class="switch-row"><span>显示命中区域</span><input type="checkbox" id="hitareas-toggle" disabled></label>
+            <div id="hitareas-panel" class="feature-list"><p class="empty-msg">当前模型没有命中区域</p></div>
+            <button id="delete-model-btn" class="danger-btn" type="button" disabled>移除当前模型</button>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script>
+const EXCLUSION_PATTERNS = {
+  SDK_INFO: [/^Live2D(?:\s+(?:SDK\s+)?\d+\.\d+(?:\.\d+)?(?:_\d+)?)?/i, /^profile\s*:\s*\w+\s*$/i, /http:\/\/www\.pixijs\.com/i],
+  CUBISM_CORE: [/\[CSM\]\[[IWEDF]\]/i],
+  AUDIO_MOTION: [/^\[SoundManager\]\s+(?:Error\s+occurred\s+on|Failed\s+to|Unable\s+to|Cannot)/i, /^\[MotionManager(?:.*?)\]\s+(?:failed\s+to\s+play\saudio|error|unable\s+to)/i, /\[MotionManager\(\)\] Failed to load motion: .*/i],
+  INTERNAL_CONFIG: [/^\s*\[PROFILE_NAME\]\s*=\s*[\w-]+\s*$/i, /^\s*\[USE_ADJUST_TRANSLATION\]\s*=\s*(?:true|false|TRUE|FALSE|0|1)\s*$/i, /^\s*\[USE_CACHED_POLYGON_IMAGE\]\s*=\s*(?:true|false|TRUE|FALSE|0|1)\s*$/i, /^\s*\[EXPAND_W\]\s*=\s*-?\d+(?:\.\d+)?\s*$/i],
+  MISC: [/^_\$li : call _\$Ri\.update\(\) before _\$Ri\.draw\(\)/i]
+};
+const ALL_PATTERNS = Object.values(EXCLUSION_PATTERNS).flat();
+const DEBUG_KEY = 'consoleDebug';
+Object.defineProperty(window, 'consoleDebug', {get: () => localStorage.getItem(DEBUG_KEY) === 'true', set: (val) => localStorage.setItem(DEBUG_KEY, val ? 'true' : 'false'), configurable: true, enumerable: true});
+const wrapMethod = (original) => (...args) => {
+  if (window.consoleDebug) { const trace = new Error().stack?.split('\n')[2]?.trim() ?? 'Trace unavailable'; original.apply(console, [...args, `\n ↳ ${trace}`]); return; }
+  const msg = args.map(String).join(' ');
+  if (!ALL_PATTERNS.some((pattern) => pattern.test(msg))) original.apply(console, args);
+};
+console.log = wrapMethod(console.log); console.warn = wrapMethod(console.warn); console.error = wrapMethod(console.error);
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.10/dist/browser/pixi.min.js"></script>
+  <script src="https://raw.githubusercontent.com/ImDuck42/Live2D-Viewer/main/libs/live2dcubismcore.js"></script>
+  <script src="https://raw.githubusercontent.com/ImDuck42/Live2D-Viewer/main/libs/live2d.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/index.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="./libs/extra.js"></script>
+  <script src="./app.bundle.js"></script>
+</body>
+</html>
