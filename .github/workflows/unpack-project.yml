@@ -17,11 +17,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -f .upload/fix.b64 ]; then
-            echo "Repair archive already applied; nothing to do."
-            exit 0
-          fi
-          base64 --decode .upload/fix.b64 > /tmp/live2d-fix.zip
+          for part in fix00 fix01 fix02 fix03 fix04 fix05 fix06; do
+            if [ ! -f ".upload/$part" ]; then
+              echo "Waiting for all repair chunks. Missing: $part"
+              exit 0
+            fi
+          done
+          cat .upload/fix00 .upload/fix01 .upload/fix02 .upload/fix03 .upload/fix04 .upload/fix05 .upload/fix06 > /tmp/live2d-fix.b64
+          base64 --decode /tmp/live2d-fix.b64 > /tmp/live2d-fix.zip
           unzip -t /tmp/live2d-fix.zip
           unzip -o /tmp/live2d-fix.zip -d .
           rm -rf .upload
