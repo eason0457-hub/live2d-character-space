@@ -1,4 +1,4 @@
-name: Unpack project
+name: Repair Live2D site
 
 on:
   push:
@@ -9,29 +9,24 @@ permissions:
   contents: write
 
 jobs:
-  unpack:
+  repair:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Reconstruct and import project
+      - name: Restore missing site bundles
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -f .upload/part00 ]; then
-            echo "Project archive already imported; nothing to do."
+          if [ ! -f .upload/fix.b64 ]; then
+            echo "Repair archive already applied; nothing to do."
             exit 0
           fi
-          cat .upload/part00 .upload/part01 .upload/part02 | base64 --decode > /tmp/live2d-project.zip
-          unzip -t /tmp/live2d-project.zip
-          unzip -o /tmp/live2d-project.zip -d .
+          base64 --decode .upload/fix.b64 > /tmp/live2d-fix.zip
+          unzip -t /tmp/live2d-fix.zip
+          unzip -o /tmp/live2d-fix.zip -d .
           rm -rf .upload
-          rm -f .init
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-          git commit -m "Restore bundled Live2D assets"
+          git commit -m "Repair Live2D site bundles"
           git push
