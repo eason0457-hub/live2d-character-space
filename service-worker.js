@@ -1,4 +1,4 @@
-const CACHE_NAME = 'live2d-space-v8';
+const CACHE_NAME = 'live2d-space-v9';
 const APP_SHELL = [
   './', './index.html', './manifest.webmanifest', './styles.bundle.css', './app.bundle.js',
   './background-fix.js', './mygo-music.js', './bandori-ui-music.js', './dialogue-chat.js',
